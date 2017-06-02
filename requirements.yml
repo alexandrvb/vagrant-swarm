@@ -1,0 +1,2 @@
+- src: https://github.com/alexandrvb/ansible-docker.git
+  name: docker
