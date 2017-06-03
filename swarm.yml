@@ -1,0 +1,51 @@
+# Install docker
+- hosts: all
+  become: yes
+  roles:
+    - docker
+
+# Init swarm manager
+- hosts: manager1
+  become: yes
+  tasks:
+    - name: Check if Swarm is active
+      shell: "docker info | grep 'Swarm: active'"
+      register: swarm_active
+      failed_when: False
+      changed_when: False
+    - name: Create swarm manager
+      shell: "docker swarm init --advertise-addr 192.168.99.100"
+      register: swarm_create
+      when: swarm_active.rc == 1
+    - name: Get worker token
+      shell: "docker swarm join-token -q worker"
+      register: swarm_token
+      changed_when: False
+
+# Init swarm worker1
+- hosts: worker1
+  become: yes
+  tasks:
+    - name: Check if Swarm is active
+      shell: "docker info | grep 'Swarm: active'"
+      register: swarm_active
+      failed_when: False
+      changed_when: False
+    - name: Add node to swarm
+      shell: "docker swarm join --token {{ hostvars['manager1']['swarm_token']['stdout'] }} 192.168.99.100:2377"
+      register: swarm_create
+      when: swarm_active.rc == 1
+
+# Init swarm worker2
+- hosts: worker2
+  become: yes
+  tasks:
+    - name: Check if Swarm is active
+      shell: "docker info | grep 'Swarm: active'"
+      register: swarm_active
+      failed_when: False
+      changed_when: False
+    - name: Add node to swarm
+      shell: "docker swarm join --token {{ hostvars['manager1']['swarm_token']['stdout'] }} 192.168.99.100:2377"
+      register: swarm_create
+      when: swarm_active.rc == 1

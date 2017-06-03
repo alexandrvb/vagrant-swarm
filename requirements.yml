@@ -1,2 +1,4 @@
 - src: https://github.com/alexandrvb/ansible-docker.git
   name: docker
+- src: https://github.com/alexandrvb/ansible-hostname.git
+  name: hostname
